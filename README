@@ -1,0 +1,12 @@
+
+--lpclib
+	Wrapper library for LPC to communicate between processes
+	There are userspace/kernel versions
+
+--taskmgrdrv
+	Driver: 
+	handle userspace IOCTL's
+	Handle taskmgr.exe loading
+
+--usrapp
+	Windows service and application that communicates with driver
