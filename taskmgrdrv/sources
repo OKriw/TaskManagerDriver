@@ -1,0 +1,11 @@
+TARGETNAME=taskmgr_driver
+TARGETPATH=.
+TARGETTYPE=DRIVER
+
+SOURCES= taskmgr_driver.c 	
+	
+TARGETLIBS= \
+	ntdllp.lib \
+	klpc.lib
+
+
