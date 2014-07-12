@@ -62,7 +62,6 @@ BOOL SendDeviceIoControl(LPCWSTR deviceName, DWORD *handles, DWORD hbSize)
 NTSTATUS OnConnRequest(PLPC_MESSAGE request)
 {
     log("OnConnRequest() callback\n");
-
     return 0;
 }
 
@@ -73,7 +72,6 @@ NTSTATUS OnRequest(PLPC_MESSAGE request, PLPC_MESSAGE reply)
     memcpy(reply->data, msg, strlen(msg));
     reply->header.DataLength = strlen(msg);
     reply->header.TotalLength = strlen(msg) + sizeof(LPC_MESSAGE_HEADER);
-    //PrintLpcMessageHeader((PLPC_MESSAGE_HEADER) request);
     return 0;
 }
 

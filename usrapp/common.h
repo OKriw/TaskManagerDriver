@@ -30,8 +30,6 @@
 #endif /* USER_ */
 
 
-
-
 typedef enum _LPC_TYPE {
     LPC_NEW_MESSAGE,    // A new message
     LPC_REQUEST,        // A request message
@@ -47,8 +45,6 @@ typedef enum _LPC_TYPE {
 } LPC_TYPE;
 
 
-
-
 typedef struct _LPC_MESSAGE_HEADER {
     USHORT   DataLength;
     USHORT   TotalLength;
@@ -61,23 +57,22 @@ typedef struct _LPC_MESSAGE_HEADER {
 } LPC_MESSAGE_HEADER, *PLPC_MESSAGE_HEADER;
 
 
-
-
 typedef struct _LPC_SECTION_MEMORY
 {
-  ULONG                   Length;
-  ULONG                   ViewSize;
-  PVOID                   ViewBase;
+	ULONG                   Length;
+	ULONG                   ViewSize;
+	PVOID                   ViewBase;
 } LPC_SECTION_MEMORY, *PLPC_SECTION_MEMORY;
+
 
 typedef struct _LPC_SECTION_OWNER_MEMORY
 {
-  ULONG                   Length;
-  HANDLE                  SectionHandle;
-  ULONG                   OffsetInSection;
-  ULONG                   ViewSize;
-  PVOID                   ViewBase;
-  PVOID                   OtherSideViewBase;
+	ULONG                   Length;
+	HANDLE                  SectionHandle;
+	ULONG                   OffsetInSection;
+	ULONG                   ViewSize;
+	PVOID                   ViewBase;
+	PVOID                   OtherSideViewBase;
 } LPC_SECTION_OWNER_MEMORY, *PLPC_SECTION_OWNER_MEMORY;
 
 
@@ -91,6 +86,7 @@ typedef struct _OBJECT_ATTRIBUTES
   PVOID SecurityQualityOfService;
 } OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
 
+
 /* OBJECT_ATTRIBUTES helper */
 #define InitializeObjectAttributes( p, n, a, r, s ) { \
     (p)->Length = sizeof( OBJECT_ATTRIBUTES );          \
@@ -101,7 +97,9 @@ typedef struct _OBJECT_ATTRIBUTES
     (p)->SecurityQualityOfService = NULL;               \
     }
 
+	
 VOID NTAPI RtlInitUnicodeString (PUNICODE_STRING DestinationString, PCWSTR SourceString);
+
 
 NTSTATUS NTAPI NtCreatePort(
     OUT PHANDLE              PortHandle,
@@ -111,12 +109,14 @@ NTSTATUS NTAPI NtCreatePort(
     IN  ULONG                MaxPoolUsage
 );
 
+
 NTSYSAPI NTSTATUS NTAPI NtReplyWaitReceivePort(
-  IN  HANDLE        PortHandle,
-  OUT PVOID*        PortContext       OPTIONAL,
-  IN  PLPC_MESSAGE_HEADER  Reply             OPTIONAL,
-  OUT PLPC_MESSAGE_HEADER  IncomingRequest
-  ); 
+	IN  HANDLE        		PortHandle,
+	OUT PVOID*        		PortContext       OPTIONAL,
+	IN  PLPC_MESSAGE_HEADER Reply             OPTIONAL,
+	OUT PLPC_MESSAGE_HEADER IncomingRequest
+); 
+
 
 NTSYSAPI NTSTATUS NTAPI NtAcceptConnectPort(
     OUT    PHANDLE                   ServerPortHandle,
@@ -126,6 +126,7 @@ NTSYSAPI NTSTATUS NTAPI NtAcceptConnectPort(
     IN OUT PLPC_SECTION_OWNER_MEMORY ServerSharedMemory           OPTIONAL,
     OUT    PLPC_SECTION_MEMORY       ClientSharedMemory           OPTIONAL
 );
+
 
 NTSYSAPI NTSTATUS NTAPI NtConnectPort(
     OUT    PHANDLE                      ClientPortHandle,
@@ -138,20 +139,24 @@ NTSYSAPI NTSTATUS NTAPI NtConnectPort(
     IN OUT PULONG                       ConnectionInfoLength OPTIONAL
 );
 
+
 NTSYSAPI NTSTATUS NTAPI NtCompleteConnectPort(
     IN HANDLE               PortHandle
 );
+
 
 NTSYSAPI NTSTATUS NTAPI NtReplyPort(
   IN HANDLE               PortHandle,
   IN PLPC_MESSAGE_HEADER  Reply
 );
 
+
 NTSYSAPI NTSTATUS NTAPI NtRequestWaitReplyPort(
   IN  HANDLE               PortHandle,
   IN  PLPC_MESSAGE_HEADER  Request,
   OUT PLPC_MESSAGE_HEADER  IncomingReply
 );
+
 
 NTSYSAPI NTSTATUS NTAPI NtRequestPort(
   IN HANDLE               PortHandle,

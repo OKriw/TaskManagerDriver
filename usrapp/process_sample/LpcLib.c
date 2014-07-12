@@ -3,8 +3,6 @@
 
 #define MAX_CONNECT_INFO_SIZE   0x104
 
-
-
 NTSTATUS CreateLpcPort(PLPC_PORT LpcPort, LPCWSTR PortName)
 {
     NTSTATUS            status;
@@ -24,7 +22,7 @@ NTSTATUS CreateLpcPort(PLPC_PORT LpcPort, LPCWSTR PortName)
         maxDataSize,
         0);
     if (NT_SUCCESS(status)) {
-        log("OK\n");
+        log("Created port\n");
     } else {
         log("Failed.\nstatus: %x\n", status);
     }
@@ -82,7 +80,6 @@ NTSTATUS AcceptLpcConnect(PLPC_PORT LpcPort, BOOL AcceptConnection, BYTE *reply,
             status = NtReplyPort(hPort, (PLPC_MESSAGE_HEADER) &repMsg);
             log("NtReplyPort: %x\n", status);
             status = NtCompleteConnectPort(hPort);
-            //log("NtCompleteConnectPort: %x\n", status);
             stopFlag = TRUE;
             break;
         case LPC_PORT_CLOSED:
@@ -138,16 +135,5 @@ NTSTATUS SendLpcMessage(PLPC_PORT ClientPort, BYTE *request, WORD requestLength,
     status = NtRequestWaitReplyPort(ClientPort->hPort, (PLPC_MESSAGE_HEADER) &reqMsg, (PLPC_MESSAGE_HEADER) &repMsg);
     log("NtRequest status: %x\n", status);
 
-    /*
-    memset(&reqMsg, 0, sizeof(reqMsg));
-    reqMsg.header.DataLength = requestLength;
-    reqMsg.header.TotalLength = sizeof(reqMsg.header) + requestLength;
-    memcpy(reqMsg.data, request, requestLength);
-
-    status = NtRequestWaitReplyPort(ClientPort->hPort, (PLPC_MESSAGE_HEADER) &reqMsg, (PLPC_MESSAGE_HEADER) &repMsg);
-    log("NtRequestWaitReplyPort: %x\n", status);
-    memcpy(reply, repMsg.data, repMsg.header.DataLength);
-    *replyLength = repMsg.header.DataLength;
-    */
     return status;
 }

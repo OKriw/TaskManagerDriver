@@ -1,4 +1,3 @@
-//#include "ntddk.h"
 #include "stdio.h"
 #include "ntifs.h"
 #include <wdm.h>
@@ -40,7 +39,6 @@ enum {
 			DRV_INIT, \
 			METHOD_BUFFERED, \
 			FILE_ANY_ACCESS)
-	
 
 
 // Forward decl
@@ -66,16 +64,12 @@ VOID ImageLoadedNotifyRoutine(IN PUNICODE_STRING	FullImageName,
 	IO_STATUS_BLOCK	ioStatusBlock;
 	LPC_PORT		port;
 	
-	
-	
 	RtlInitUnicodeString(&usTarget, L"\\Device\\HarddiskVolume1\\WINDOWS\\system32\\taskmgr.exe");
 	
 	if (RtlEqualUnicodeString(FullImageName, &usTarget, FALSE)) {
 		DBGBRK();
 		DbgPrint("FullImageName:\t%wZ\tprocess_id: 0x%08x\n", FullImageName, ProcessId);
 		DbgPrint("ImageInfo:\tImageSize: %d\tBase: 0x%08x\n", ImageInfo->ImageSize, ImageInfo->ImageBase);
-			
-		//tmp = VirtualAllocEx(ProcessId, NULL, 4, MEM_COMMIT, PAGE_READWRITE);
 		
 		status = ZwWriteFile(
 				hPipeToUtility,
@@ -88,16 +82,12 @@ VOID ImageLoadedNotifyRoutine(IN PUNICODE_STRING	FullImageName,
 				NULL,
 				NULL);
 		
-		
 		status = ConnectLpcPort(&port, LPC_PORT_NAME, buf, bufLength);
 		
 		DbgPrint("LPC connection status: %x\n", status);
 		
 	}
 }
-
-
-
 
 NTSTATUS CompleteIrp(PIRP Irp, NTSTATUS status, ULONG info)
 {
@@ -120,14 +110,10 @@ NTSTATUS ReadWriteIRPhandler(IN PDEVICE_OBJECT pDo, IN PIRP Irp )
 	return CompleteIrp(Irp, STATUS_SUCCESS, 0);
 }
 
-
-
-
 VOID WorkerThreadRoutine(PVOID parameter)
 {
 	
 }
-
 
 NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG *pdwDataWritten)
 {
@@ -137,8 +123,8 @@ NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG
 	ULONG		dwDataRead, dwDataWritten;
 	HANDLE		hPipeOutWr = (HANDLE) -1;
 	HANDLE		hPipeInRd = (HANDLE) -1;
-	PFILE_OBJECT	pFile;
 	HANDLE		hKePipeOutWr;
+	PFILE_OBJECT	pFile;
 	IO_STATUS_BLOCK	ioStatusBlock;
 	
 	CHAR 	super[] = "super";
@@ -158,11 +144,8 @@ NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG
 		
 		hPipeOutWr = (HANDLE) handles[0];
 		hPipeInRd = (HANDLE) handles[1];
-		
-		
+			
 		DBGBRK();
-		
-		
 		
 		status = ObReferenceObjectByHandle(
 			hPipeOutWr,
@@ -179,7 +162,7 @@ NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG
 			return status;
 		
 		// 0n-1073741788
-	        /* STATUS = 0xc0000024 - STATUS_OBJECT_TYPE_MISMATCH */
+	    /* STATUS = 0xc0000024 - STATUS_OBJECT_TYPE_MISMATCH */
 		/* STATUS = 0n-1073741790 - ACCESS DENIED */
  		status = ObOpenObjectByPointer(
 			pFile,
@@ -194,8 +177,7 @@ NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG
 		DbgPrint("ObOpenObjectByPointer: 0x%x\n", status);
 		
 		DBGBRK();
-		
-		
+			
 		/*
 		// Try to write to pipe
 		if (NT_SUCCESS(status)) {
@@ -215,8 +197,6 @@ NTSTATUS HandleTaskmgrInit(PIRP pIrp, PIO_STACK_LOCATION pIoStackLocation, ULONG
 		*/
 	}
 
-
-	
 	return status;
 }
 
@@ -229,7 +209,6 @@ NTSTATUS CreateFileIRPHandler(IN PDEVICE_OBJECT pDo, IN PIRP pIrp)
 	DbgPrint("[tskmgrdrv] CreateFile %ws\n", pIrpStack->FileObject->FileName.Buffer);
 
 	return CompleteIrp(pIrp, STATUS_SUCCESS, 0);
-
 }
 		
 #ifdef ALLOC_PRAGMA
@@ -283,7 +262,6 @@ NTSTATUS STDCALL DriverEntry(
     }
 
 	DbgPrint("Device created: %x\n", status);
-	
 	
 	DBGBRK();
 	

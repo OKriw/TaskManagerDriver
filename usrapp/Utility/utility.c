@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
     printf("Connecting server lpc port...\n");
     status = ConnectLpcPort(&port, LPC_PORT_NAME, info, infoLenfth);
 
-
 #if 0
     char    buffer[128];
     DWORD   numBytesRead = 0;

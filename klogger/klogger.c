@@ -2,7 +2,6 @@
 #include "stdio.h"
 #include "stdarg.h"
 
-
 #define STDCALL __stdcall
 #define DEFAULT_LOG_FILE_NAME	L"\\??\\c:\\ioman.log"
 
@@ -72,14 +71,15 @@ NTSTATUS InitRingBuffer(PRING_BUFFER *pRb)
 	PCHAR 		buf;
 	
 	DbgPrint("klogger.sys: RB Initialization\n");
-	
 	*pRb = (PRING_BUFFER) ExAllocatePool(NonPagedPool, sizeof(RING_BUFFER));
 	
-	if (*pRb == NULL) return STATUS_FATAL_APP_EXIT;
-	
+	if (*pRb == NULL)
+		return STATUS_FATAL_APP_EXIT;
+
 	buf = (PCHAR) ExAllocatePool(NonPagedPool, sizeof(CHAR) * MAX_BUFFER_SIZE);
 	
-	if (buf == NULL) return STATUS_FATAL_APP_EXIT;
+	if (buf == NULL)
+		return STATUS_FATAL_APP_EXIT;
 	
 	(*pRb)->pLogBuf = buf;
 	(*pRb)->pStart = buf;
@@ -94,44 +94,32 @@ NTSTATUS InitRingBuffer(PRING_BUFFER *pRb)
 VOID FreeRingBuffer(PRING_BUFFER pRb)
 {
 	DbgPrint("klogger.sys: RB free\n");
-	if (pRb->pLogBuf) ExFreePool(pRb->pLogBuf);
+	if (pRb->pLogBuf)
+		ExFreePool(pRb->pLogBuf);
 	
-	if (pRb) ExFreePool(pRb);
-
+	if (pRb)
+		ExFreePool(pRb);
 }
 
 VOID WriteToBufferHelper(PRING_BUFFER pRb, const PCHAR pMsg, ULONG size)
 {
 	ULONG tail;
-	
-	//DbgPrint("klogger.sys: Write to log buf");
-	
-	if (size >= pRb->size) {
-		//DbgPrint("klogger.sys: Crop log message!\n");
+	if (size >= pRb->size)
 		size = pRb->size-1;
-	}
-	
+		
 	tail = pRb->size - (pRb->pEnd - pRb->pLogBuf);
 	
 	if (size > tail) {
-		//DbgPrint("klogger.sys: RingBuffer wrap\n");
 		RtlCopyMemory(pRb->pEnd, pMsg, tail);
 		RtlCopyMemory(pRb->pLogBuf, pMsg + tail, size - tail);
-		
 		pRb->pEnd = pRb->pLogBuf + size - tail;
 		
 		if (pRb->pEnd >= pRb->pStart) {
 			pRb->pStart = pRb->pLogBuf + (size - tail + 1) % pRb->size;
 		}
-		
-		//state = pRb->size - (pRb->pStart - pRb->pEnd);
-		
 	} else {
 		RtlCopyMemory(pRb->pEnd, pMsg, size);
 		pRb->pEnd += size;
-		
-		//state = pRb->pEnd - pRb->pStart;
-		
 	}
 }
 
@@ -144,14 +132,7 @@ VOID WriteToBuffer(
 	PKSPIN_LOCK		spinLock;
 	KIRQL			currentIrql, oldIrql;
 	
-	
-	
-	//in init KeInitializeSpinLock(&spinLock);
-	
 	KeRaiseIrql(HIGH_LEVEL, &oldIrql);
-	
-	//currentIrql = KeGetCurrentIrql();
-		
 	KeAcquireSpinLockAtDpcLevel(spinLock, &currentIrql);
 	
 	bNeedFlush = WriteToBufferHelper(
@@ -160,20 +141,16 @@ VOID WriteToBuffer(
 			size);
 	
 	KeReleaseSpinLockFromDpcLevel(spinLock, currentIrql);
-	
 	KeLowerIrql(&oldIrql);
 	
 	if (bNeedFlush)
-		if (KeGetCurrentIrql()<2) {
+		if (KeGetCurrentIrql() < 2) {
 			KeSetEvent
 		} else {
 			KeInsertQueuedDpc
 		}
 }
 	
-	
-
-
 VOID loggerDeferredRoutine( 
 		IN PKDPC pthisDpcObject,
 		IN PVOID DeferredContext,
@@ -183,9 +160,7 @@ VOID loggerDeferredRoutine(
 {
 	DbgPrint("Print from deffered routine\n");
 	
-	
 }
-
 
 VOID SetWriteEvent( 
 		IN PKDPC pthisDpcObject,
@@ -194,7 +169,7 @@ VOID SetWriteEvent(
 		IN PVOID SystemArgument2
 		)
 {
-	DbgPrint("Set write event from deffered routine\n");
+	DbgPrint("Set write event from deferred routine\n");
 	KeSetEvent(&WriteEvent, 0, FALSE);
 	
 }
@@ -206,9 +181,8 @@ VOID SetFlushEvent(
 		IN PVOID SystemArgument2
 		)
 {
-	DbgPrint("Set event from deffered routine\n");
+	DbgPrint("Set event from deferred routine\n");
 	KeSetEvent(&FlushEvent, 0, FALSE);
-	
 }
 
 
@@ -251,32 +225,16 @@ VOID TestThread(IN PVOID Context)
 	//WriteToBuffer(pRb, "some", 4);
 	DbgPrint("Current irql %d\n", currentIrql);
 	
-	
-	/*
-	KeWaitForSingleObject(
-			pTimer,
-			Executive,
-			KernelMode,
-			FALSE,
-			&maxTimeout);
-	*/
-	
-	
-	
 	if (currentIrql == PASSIVE_LEVEL) {
 		KeSetEvent(&FlushEvent, 0, FALSE);
 	} else {
 		KeInsertQueueDpc(pDpc, NULL, NULL);
 	}
 	
-	
-	
 	KeLowerIrql(&oldIrql);
-	
 	PsTerminateSystemThread(status);
 	
 }
-
 
 
 VOID IOThread(IN PVOID Context)
@@ -284,12 +242,10 @@ VOID IOThread(IN PVOID Context)
 	KIRQL			currentIrql, oldIrql;
 	LARGE_INTEGER 	timeout, maxTimeout;
 	NTSTATUS		status = STATUS_SUCCESS;
-			
 	PRING_BUFFER	pRb;
-	const PCHAR 	pMsg = "messahe1";
+	const PCHAR 	pMsg = "message1";
 	ULONG			size = 8;
 	INT_PTR			state;
-	
 	PKTIMER			pTimer;
 	LONG 			interval;
 	
@@ -305,7 +261,6 @@ VOID IOThread(IN PVOID Context)
 	
 	state = (INT_PTR) ExAllocatePool(NonPagedPool, sizeof(INT));	
 	
-	
 	// Set timer for periodic flush
 	pTimer=(PKTIMER) ExAllocatePool(NonPagedPool, sizeof(KTIMER));
 	KeInitializeTimerEx(pTimer, SynchronizationTimer);
@@ -316,10 +271,8 @@ VOID IOThread(IN PVOID Context)
 	pObjects[1] = &StopEvent;			// stop flush loop
 	pObjects[2] = &FlushEvent;			// do flush, buffer is full
 	
-	
 	// Flush loop
 	while (status != STATUS_WAIT_1) {
-	
 		status = KeWaitForMultipleObjects(
 				3,
 				pObjects,
@@ -329,8 +282,7 @@ VOID IOThread(IN PVOID Context)
 				FALSE,
 				&maxTimeout,
 				NULL);
-				
-				
+			
 		if (status == STATUS_WAIT_0) {
 			DbgPrint("Timer flush\n");
 		} else if (status == STATUS_WAIT_2) {
@@ -340,10 +292,7 @@ VOID IOThread(IN PVOID Context)
 			break;
 		}
 		
-		//Klog("Msg from klog %d\s", 123);
 		KloggerWriteToFile();
-		//DbgPrint("State: %d\n", state);
-		
 	}
 	
 	DbgPrint("klogger.sys: IOThread get stop signal\n");
@@ -372,13 +321,9 @@ NTSTATUS STDCALL DriverEntry(
 		
 	// Initialize events
 	KeInitializeEvent(&StartEvent, SynchronizationEvent, FALSE);
-		
 	KeInitializeEvent(&StopEvent, SynchronizationEvent, FALSE);
-
 	KeInitializeEvent(&FlushEvent, SynchronizationEvent, FALSE);
-	
 	KeInitializeEvent(&WriteEvent, SynchronizationEvent, FALSE);
-	
 	
 	// Create worker thread
 	status = PsCreateSystemThread(
@@ -391,7 +336,6 @@ NTSTATUS STDCALL DriverEntry(
 			NULL);
 			
 	DbgPrint("klogger.sys: Status: %x\n", status);
-	
 	
 	// get reference
 	if (NT_SUCCESS(status)) {

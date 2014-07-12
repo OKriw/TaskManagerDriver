@@ -4,8 +4,6 @@
 #include "Common.h"
 
 #define LPC_REFUSED 0xc0000041
-
-
 #define DATA_SIZE   50
 
 typedef struct _LPC_MESSAGE {
@@ -24,8 +22,6 @@ typedef struct _LPC_TERMINATION_MESSAGE
 #define LPC_PORT_ACCEPT_CONNECT (1 << 0) /* Acepting connection flag */
 #define LPC_PORT_TARGET_PROCESS (1 << 1) /* Accept only target process */
 #define LPC_PORT_USING_BUFFER   (1 << 2) /* Use port buffer to set reply msg */
-
-
 
 typedef struct _LPC_OPS {
     NTSTATUS (*ObConnRequest) (PLPC_MESSAGE req);
